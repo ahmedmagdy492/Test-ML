@@ -6,44 +6,45 @@
 using namespace std;
 
 static int traning_set[][2] = {
-	{13300000,7420},
-	{12250000,8960},
-	{12250000,9960},
-	{12215000,7500},
-	{11410000,7420},
-	{10850000,7500},
-	{10150000,8580},
-	{10150000,16200},
-	{9870000,8100},
-	{9800000,5750},
-	{9800000,13200},
-	{9681000,6000},
-	{9310000,6550},
-	{9240000,3500},
-	{9240000,7800},
-	{9100000,6000},
-	{9100000,6600}
+	{0,0},
+	{1,2},
+	{2,4},
+	{3,6},
+	{4,8},
+	{5,10}
 };
 
-void ML() {
+void Gradient_Desc(int* ceta0, int* ceta1, int m, int sum, int x) {
+	int alpha = 1;
+	int temp0 = *ceta0 - alpha * (sum/m);
+	int temp1 = *ceta1 - alpha * (sum/m) * x;
+
+	*ceta0 = temp0;
+	*ceta1 = temp1;
+}
+
+void ML(int count = 500) {
 	srand(time(NULL));
 	int size = sizeof(traning_set)/(sizeof(int)*2);
-	int summation = 0;
 
-	for(int i = 0; i < size; i++) {
-		unsigned int ceta0 = abs(rand());
-		unsigned int ceta1 = abs(rand());;
-		unsigned int price = ceta0*traning_set[i][1] + ceta1;
-		cout << "prediected y = " << price << ", actual y = " << traning_set[i][0] << endl;
+	for(int j = 0; j < count; j++) {
+		int summation = 0, ceta0 = abs(rand()%10+1), ceta1 = abs(rand()%10+1);
+
+		for(int i = 0; i < size; i++) {
+			int price = ceta0*traning_set[i][0] + ceta1;
+			cout << "my price = " << price << ", actual price = " << traning_set[i][0] << endl;
 		
-		summation += pow(price - traning_set[i][0], 2);
-	}
+			summation += pow(price - traning_set[i][1], 2);
+			Gradient_Desc(&ceta0, &ceta1, size, summation, traning_set[i][0]);
+		}
 
-	float loss = (float)summation / (float)size;
-	cout << "loss = " << loss << endl;
+		float loss = (float)summation / ((float)size*2) * 100;
+		cout << "loss = " << loss << endl;
+		
+	}
 	
 }
 
 int main() {
-	ML();
+	ML(3);
 }
