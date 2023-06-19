@@ -5,7 +5,7 @@
 
 using namespace std;
 
-static int traning_set[][2] = {
+double traning_set[][2] = {
 	{0,0},
 	{1,2},
 	{2,4},
@@ -14,37 +14,66 @@ static int traning_set[][2] = {
 	{5,10}
 };
 
-void Gradient_Desc(int* ceta0, int* ceta1, int m, int sum, int x) {
-	int alpha = 1;
-	int temp0 = *ceta0 - alpha * (sum/m);
-	int temp1 = *ceta1 - alpha * (sum/m) * x;
+double Predict(double m, double x, double b) {
+	return m * x + b;
+}
 
-	*ceta0 = temp0;
-	*ceta1 = temp1;
+double Cost(double m, double b) {
+	int size = sizeof(traning_set) / (sizeof(int) * 2);
+	double sum = 0;
+
+	for (int i = 0; i < size; i++) {
+		double error = Predict(m, traning_set[i][0], b) - traning_set[i][1];
+		sum += error * error;
+	}
+
+	return sum / size;
+}
+
+double DervativeOfFuncitonJForPointB(double m, double b) {
+	int size = sizeof(traning_set) / (sizeof(int) * 2);
+	double sum = 0;
+
+	for (int i = 0; i < size; i++) {
+		double error = Predict(m, traning_set[i][0], b) - traning_set[i][1];
+		sum += error;
+	}
+
+	return sum / size;
+}
+
+double DervativeOfFuncitonJForPointM(double m, double b) {
+	int size = sizeof(traning_set) / (sizeof(int) * 2);
+	double sum = 0;
+
+	for (int i = 0; i < size; i++) {
+		double error = Predict(m, traning_set[i][0], b) - traning_set[i][1];
+		sum += (error * traning_set[i][0]);
+	}
+
+	return sum / size;
+}
+
+void GrandientDescent(double *m, double *b) {
+	double temp0 = *m - 0.1 * DervativeOfFuncitonJForPointM(*m, *b);
+	double temp1 = *b - 0.1 * DervativeOfFuncitonJForPointB(*m, *b);
+	*m = temp0;
+	*b = temp1;
 }
 
 void ML(int count = 500) {
 	srand(time(NULL));
-	int size = sizeof(traning_set)/(sizeof(int)*2);
+	int size = sizeof(traning_set) / (sizeof(int) * 2);
+	double m = rand()%10+1, b = rand()%10+1;
 
 	for(int j = 0; j < count; j++) {
-		int summation = 0, ceta0 = abs(rand()%10+1), ceta1 = abs(rand()%10+1);
-
-		for(int i = 0; i < size; i++) {
-			int price = ceta0*traning_set[i][0] + ceta1;
-			cout << "my price = " << price << ", actual price = " << traning_set[i][0] << endl;
-		
-			summation += pow(price - traning_set[i][1], 2);
-			Gradient_Desc(&ceta0, &ceta1, size, summation, traning_set[i][0]);
-		}
-
-		float loss = (float)summation / ((float)size*2) * 100;
-		cout << "loss = " << loss << endl;
-		
+		double loss = Cost(m, b);
+		cout << "Loss: " << loss << endl;
+		GrandientDescent(&m, &b);
 	}
 	
 }
 
 int main() {
-	ML(3);
+	ML();
 }
